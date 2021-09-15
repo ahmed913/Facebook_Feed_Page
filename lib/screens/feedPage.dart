@@ -1,4 +1,7 @@
+import 'package:facebook_feed_page/bloc/homebloc.dart';
+import 'package:facebook_feed_page/bloc/homestates.dart';
 import 'package:facebook_feed_page/data/user.dart';
+import 'package:facebook_feed_page/models/post.dart';
 import 'package:facebook_feed_page/styles/palette.dart';
 import 'package:facebook_feed_page/widgets/additiona_options.dart';
 import 'package:facebook_feed_page/widgets/contact_list.dart';
@@ -8,6 +11,7 @@ import 'package:facebook_feed_page/widgets/profileAvatar.dart';
 import 'package:facebook_feed_page/widgets/responsive.dart';
 import 'package:facebook_feed_page/widgets/rooms.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 class FeedPage extends StatefulWidget {
 
@@ -25,22 +29,30 @@ class _FeedPageState extends State<FeedPage> {
     super.dispose();
   }
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context ) {
     final Size screenSize = MediaQuery.of(context).size;
 
-    return GestureDetector(
-      onTap: () => FocusScope.of(context).unfocus(),
-      child: DefaultTabController(
-        length: 5,
-        child: Scaffold(
-          body: Responsive(
-            mobile:
-            _HomeScreenMobile(scrollController: _trackingScrollController),
-            desktop:
-            _HomeScreenDesktop(scrollController: _trackingScrollController),
-          ),
-        ),
-      )
+
+    return BlocConsumer<HomeBloc , HomeStates>(
+      listener: (context , state) {
+
+      },
+      builder: (context , state) {
+        return GestureDetector(
+            onTap: () => FocusScope.of(context).unfocus(),
+            child: DefaultTabController(
+              length: 5,
+              child: Scaffold(
+                body: Responsive(
+                  mobile:
+                  _HomeScreenMobile(scrollController: _trackingScrollController),
+                  desktop:
+                  _HomeScreenDesktop(scrollController: _trackingScrollController),
+                ),
+              ),
+            )
+        );
+      },
     );
   }
 }
@@ -52,13 +64,13 @@ class _HomeScreenMobile extends StatelessWidget {
   }) ;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context ) {
     final Size screenSize = MediaQuery.of(context).size;
 
     return NestedScrollView(
       controller: scrollController,
-        headerSliverBuilder: (context , innerBoxIsScrolled) => [
-          Responsive.isDesktop(context)
+        headerSliverBuilder: (context , innerBoxIsScrolled ) => [
+          Responsive.isDesktop(context, )
               ? PreferredSize(
             preferredSize: Size(screenSize.width, 100.0),
             child: SliverAppBar(
@@ -222,7 +234,7 @@ class _HomeScreenMobile extends StatelessWidget {
             ) : null ,
           )
         ],
-        body: SingleChildScrollView(
+        body: SingleChildScrollView (
           physics: BouncingScrollPhysics(),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -411,7 +423,7 @@ class _HomeScreenMobile extends StatelessWidget {
 
               //posts
 
-              Posts(),
+              PostBuilder(),
 
               SizedBox(
                 height: 8,
@@ -805,7 +817,23 @@ class _HomeScreenDesktop extends StatelessWidget {
 
                     //posts
 
-                    Posts(),
+                    ListView.separated(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      // itemCount: bloc.localPosts.length,
+                      itemCount: posts.length,
+                      separatorBuilder: (BuildContext context, int index) {
+                        return SizedBox(
+                          height: 24,
+                        );
+                      },
+                      itemBuilder: (BuildContext context, int index) {
+                        final Post post = posts[index];
+
+                        return Posts(post: post);
+
+                      },
+                    ),
 
                     SizedBox(
                       height: 8,

@@ -1,646 +1,171 @@
+import 'package:facebook_feed_page/bloc/homebloc.dart';
+import 'package:facebook_feed_page/bloc/homestates.dart';
+import 'package:facebook_feed_page/models/post.dart';
 import 'package:facebook_feed_page/styles/palette.dart';
-import 'package:facebook_feed_page/widgets/PostButton.dart';
+import 'package:facebook_feed_page/widgets/profileAvatar.dart';
+import 'package:facebook_feed_page/widgets/responsive.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:mdi/mdi.dart';
 
-class Posts extends StatelessWidget {
+class PostBuilder extends StatelessWidget {
+  const PostBuilder({Key? key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      child: Column(children: [
-        Card(
-          elevation: 5,
-          color: Colors.white,
-          margin: EdgeInsets.all(8),
-          clipBehavior: Clip.antiAliasWithSaveLayer,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              ListTile(
-                contentPadding: EdgeInsets.symmetric(horizontal: 10),
-                trailing: IconButton(
-                  icon: Icon(
-                    Icons.more_horiz,
-                    color: Colors.black,
-                    size: 16,
-                  ),
-                  onPressed: () {},
-                ),
-                leading: CircleAvatar(
-                  radius: 20,
-                  backgroundImage: NetworkImage(
-                    'https://scontent.fcai21-2.fna.fbcdn.net/v/t1.6435-9/202119540_1953508174805178_2142273906307865793_n.jpg?_nc_cat=100&ccb=1-5&_nc_sid=09cbfe&_nc_ohc=1jkXAfyT8YcAX9L5-ql&_nc_ht=scontent.fcai21-2.fna&oh=8f2ad62300e9781e66bedd6e1b182f0a&oe=61616E99',
-                  ),
-                ),
-                title: Row(
-                  children: [
-                    Text(
-                      'Ahmed Essa',
-                      style: TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                    SizedBox(
-                      width: 5,
-                    ),
-                    Icon(
-                      Icons.check_circle,
-                      color: Palette.facebookBlue,
-                      size: 16.0,
-                    )
-                  ],
-                ),
-                subtitle: Text(
-                  'Today at 1:30 pm',
-                  style:
-                      Theme.of(context).textTheme.caption!.copyWith(height: 0),
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 10),
-                child: Divider(
-                  color: Colors.grey,
-                  height: 1.0,
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.only(top: 10, bottom: 5),
-                child: Container(
-                  padding: EdgeInsets.symmetric(horizontal: 10),
-                  child: Text(
-                    'Thank God it\'s been a summer full of achievements, it\'s not the end, it\'s just the beginning',
-                    style: Theme.of(context).textTheme.subtitle1!.copyWith(
-                        height: 1.3, fontSize: 14, fontWeight: FontWeight.w600),
-                  ),
-                ),
-              ),
-              Container(
-                padding: EdgeInsets.symmetric(horizontal: 8),
-                child: Wrap(children: [
-                  Container(
-                    padding: EdgeInsetsDirectional.only(end: 6),
-                    height: 25,
-                    child: MaterialButton(
-                      onPressed: () {},
-                      padding: EdgeInsets.zero,
-                      child: Text(
-                        '#SelfStudy',
-                        style: Theme.of(context)
-                            .textTheme
-                            .caption!
-                            .copyWith(color: Palette.facebookBlue),
-                      ),
-                      minWidth: 1.0,
-                    ),
-                  ),
-                ]),
-              ),
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 5),
-                child: Container(
-                  height: 220,
-                  width: double.infinity,
-                  child: Row(
+    return BlocConsumer<HomeBloc, HomeStates>(
+        listener: (context, state) {},
+        builder: (context, snapshot) {
+          final bloc = HomeBloc.get(context);
+          return ListView.separated(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            itemCount: bloc.delayPosts.length,
+            separatorBuilder: (BuildContext context, int index) {
+              return SizedBox(
+                height: 24,
+              );
+            },
+            itemBuilder: (BuildContext context, int index) {
+              return Posts(
+                post: bloc.delayPosts[index],
+              );
+            },
+          );
+        });
+  }
+}
+
+
+
+
+class Posts extends StatelessWidget {
+  final Post post;
+
+  const Posts({
+    required this.post,
+  }) ;
+
+  @override
+  Widget build(BuildContext context) {
+    final bool isDesktop = Responsive.isDesktop(context);
+    return BlocConsumer<HomeBloc , HomeStates>(
+      listener: (context , state) {},
+      builder: (context , state){
+
+        return Card(
+          margin: EdgeInsets.symmetric(
+            vertical: 5.0,
+            horizontal: isDesktop ? 5.0 : 0.0,
+          ),
+          elevation: isDesktop ? 1.0 : 0.0,
+          shape: isDesktop
+              ? RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0))
+              : null,
+          child: Container(
+            padding: const EdgeInsets.symmetric(vertical: 8.0),
+            color: Colors.white,
+            child: Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 12.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      Expanded(
-                        child: Image(
-                          image: NetworkImage(
-                            'https://udemy-certificate.s3.amazonaws.com/image/UC-d83f0b6d-fb1d-4725-b370-f8484e0b7682.jpg',
-                          ),
-                        ),
-                      ),
-                      Expanded(
-                        child: Image(
-                          image: NetworkImage(
-                              'https://udemy-certificate.s3.amazonaws.com/image/UC-d6adf7ca-fc30-422f-9afb-d025a96e7d6a.jpg'),
-                        ),
-                      )
+                      _PostHeader(post: post),
+                      const SizedBox(height: 4.0),
+                      Text(post.caption),
+                      post.imageUrl != null
+                          ? const SizedBox.shrink()
+                          : const SizedBox(height: 6.0),
                     ],
                   ),
                 ),
-              ),
-              Padding(
-                padding:
-                    const EdgeInsets.symmetric(vertical: 5.0, horizontal: 10),
-                child: Row(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(4.0),
-                      decoration: BoxDecoration(
-                        color: Palette.facebookBlue,
-                        shape: BoxShape.circle,
-                      ),
-                      child: const Icon(
-                        Icons.thumb_up,
-                        size: 10.0,
-                        color: Colors.white,
-                      ),
-                    ),
-                    SizedBox(width: 4.0),
-                    Expanded(
-                      child: Text(
-                        '18k',
-                        style: TextStyle(
-                          color: Colors.grey[600],
-                        ),
-                      ),
-                    ),
-                    Text(
-                      '129 Comments',
-                      style: TextStyle(
-                        color: Colors.grey[600],
-                      ),
-                    ),
-                    const SizedBox(width: 8.0),
-                    Text(
-                      '4k Shares',
-                      style: TextStyle(
-                        color: Colors.grey[600],
-                      ),
-                    )
-                  ],
+                post.imageUrl != null
+                    ? Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8.0),
+                  child: Image(image: NetworkImage('${post.imageUrl}')),
+                )
+                    : const SizedBox.shrink(),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 12.0),
+                  child: _PostStats(post: post),
+                ),
+              ],
+            ),
+          ),
+        );
+
+      },
+    );
+  }
+}
+
+
+
+class _PostHeader extends StatelessWidget {
+  final Post post;
+
+  const _PostHeader({
+    required this.post,
+  }) ;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        ProfileAvatar(imageUrl: post.user.imageUrl),
+        const SizedBox(width: 8.0),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                post.user.name,
+                style: const TextStyle(
+                  fontWeight: FontWeight.w600,
                 ),
               ),
-              Padding(
-                padding: const EdgeInsets.all(20.0),
-                child: Row(
-                  children: [
-                    PostButton(
-                      icon: Icon(
-                        Icons.thumb_up_outlined,
-                        color: Colors.grey[600],
-                        size: 20.0,
-                      ),
-                      label: 'Like',
-                      onTap: () => print('Like'),
+              Row(
+                children: [
+                  Text(
+                    '${post.timeAgo} • ',
+                    style: TextStyle(
+                      color: Colors.grey[600],
+                      fontSize: 12.0,
                     ),
-                    PostButton(
-                      icon: Icon(
-                        Icons.mode_comment_outlined,
-                        color: Colors.grey[600],
-                        size: 20.0,
-                      ),
-                      label: 'Comment',
-                      onTap: () => print('Comment'),
-                    ),
-                    PostButton(
-                      icon: Icon(
-                        Icons.share_outlined,
-                        color: Colors.grey[600],
-                        size: 25.0,
-                      ),
-                      label: 'Share',
-                      onTap: () => print('Share'),
-                    )
-                  ],
-                ),
+                  ),
+                  Icon(
+                    Icons.public,
+                    color: Colors.grey[600],
+                    size: 12.0,
+                  )
+                ],
               ),
             ],
           ),
         ),
-        Card(
-          elevation: 5,
-          color: Colors.white,
-          margin: EdgeInsets.all(8),
-          clipBehavior: Clip.antiAliasWithSaveLayer,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              ListTile(
-                contentPadding: EdgeInsets.symmetric(horizontal: 10),
-                trailing: IconButton(
-                  icon: Icon(
-                    Icons.more_horiz,
-                    color: Colors.black,
-                    size: 16,
-                  ),
-                  onPressed: () {},
-                ),
-                leading: CircleAvatar(
-                  radius: 20,
-                  backgroundImage: NetworkImage(
-                      'https://scontent.fcai21-2.fna.fbcdn.net/v/t1.6435-9/79515135_10111007623880301_5111576226921709568_n.jpg?_nc_cat=1&ccb=1-5&_nc_sid=09cbfe&_nc_ohc=gTSP8CiMPggAX82QxBT&_nc_ht=scontent.fcai21-2.fna&oh=49303ce718ff79f2877ad06fd12712f3&oe=615F8456'),
-                ),
-                title: Row(
-                  children: [
-                    Text(
-                      'Mark Zuckerberg',
-                      style: TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                    SizedBox(
-                      width: 5,
-                    ),
-                    Icon(
-                      Icons.check_circle,
-                      color: Palette.facebookBlue,
-                      size: 16.0,
-                    )
-                  ],
-                ),
-                subtitle: Text(
-                  'Yesterday at 11:21 Am',
-                  style:
-                      Theme.of(context).textTheme.caption!.copyWith(height: 0),
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 10),
-                child: Divider(
-                  color: Colors.grey,
-                  height: 1.0,
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.only(top: 10, bottom: 5),
-                child: Container(
-                  padding: EdgeInsets.symmetric(horizontal: 10),
-                  child: Text(
-                    'Priscilla and I co-founded the Breakthrough Prize to celebrate scientists at the forefront of discovery. This year, I\'m especially excited by the work laureates Katalin Karikó and Drew Weissman did to help create the Covid vaccine. Their research started decades ago to learn how to use mRNA\'s ability to teach cells to make proteins in order to cause an immune response. Their efforts paved the way to use mRNA in the Pfizer/BioNTech and Moderna vaccines, and opened the door to use mRNA in future vaccines and treatments for diseases -- including potentially HIV and cancer. Congrats to all the 2022 Breakthrough Prize winners!',
-                    style: Theme.of(context).textTheme.subtitle1!.copyWith(
-                        height: 1.3, fontSize: 14, fontWeight: FontWeight.w600),
-                  ),
-                ),
-              ),
-              Container(
-                padding: EdgeInsets.symmetric(horizontal: 8),
-                child: Wrap(children: [
-                  Container(
-                    padding: EdgeInsetsDirectional.only(end: 6),
-                    height: 25,
-                    child: MaterialButton(
-                      onPressed: () {},
-                      padding: EdgeInsets.zero,
-                      child: Text(
-                        '#KeepGoing',
-                        style: Theme.of(context)
-                            .textTheme
-                            .caption!
-                            .copyWith(color: Palette.facebookBlue),
-                      ),
-                      minWidth: 1.0,
-                    ),
-                  ),
-                ]),
-              ),
-              Padding(
-                padding:
-                    const EdgeInsets.symmetric(vertical: 5.0, horizontal: 10),
-                child: Row(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(4.0),
-                      decoration: BoxDecoration(
-                        color: Palette.facebookBlue,
-                        shape: BoxShape.circle,
-                      ),
-                      child: const Icon(
-                        Icons.thumb_up,
-                        size: 10.0,
-                        color: Colors.white,
-                      ),
-                    ),
-                    SizedBox(width: 4.0),
-                    Expanded(
-                      child: Text(
-                        '18k',
-                        style: TextStyle(
-                          color: Colors.grey[600],
-                        ),
-                      ),
-                    ),
-                    Text(
-                      '129 Comments',
-                      style: TextStyle(
-                        color: Colors.grey[600],
-                      ),
-                    ),
-                    const SizedBox(width: 8.0),
-                    Text(
-                      '4k Shares',
-                      style: TextStyle(
-                        color: Colors.grey[600],
-                      ),
-                    )
-                  ],
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.all(20.0),
-                child: Row(
-                  children: [
-                    PostButton(
-                      icon: Icon(
-                        Icons.thumb_up_outlined,
-                        color: Colors.grey[600],
-                        size: 20.0,
-                      ),
-                      label: 'Like',
-                      onTap: () => print('Like'),
-                    ),
-                    PostButton(
-                      icon: Icon(
-                        Icons.mode_comment_outlined,
-                        color: Colors.grey[600],
-                        size: 20.0,
-                      ),
-                      label: 'Comment',
-                      onTap: () => print('Comment'),
-                    ),
-                    PostButton(
-                      icon: Icon(
-                        Icons.share_outlined,
-                        color: Colors.grey[600],
-                        size: 25.0,
-                      ),
-                      label: 'Share',
-                      onTap: () => print('Share'),
-                    )
-                  ],
-                ),
-              ),
-            ],
-          ),
+        IconButton(
+          icon: const Icon(Icons.more_horiz),
+          onPressed: () => print('More'),
         ),
-        Card(
-          elevation: 5,
-          color: Colors.white,
-          margin: EdgeInsets.all(8),
-          clipBehavior: Clip.antiAliasWithSaveLayer,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              ListTile(
-                contentPadding: EdgeInsets.symmetric(horizontal: 10),
-                trailing: IconButton(
-                  icon: Icon(
-                    Icons.more_horiz,
-                    color: Colors.black,
-                    size: 16,
-                  ),
-                  onPressed: () {},
-                ),
-                leading: CircleAvatar(
-                  radius: 20,
-                  backgroundImage: NetworkImage(
-                    'https://airwallpaper.com/wp-content/uploads/images2/lionel-messi-hd-wallpapers.jpg'
-                  ),
-                ),
-                title: Row(
-                  children: [
-                    Text(
-                      'Leo Messi',
-                      style: TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                    SizedBox(
-                      width: 5,
-                    ),
-                    Icon(
-                      Icons.check_circle,
-                      color: Palette.facebookBlue,
-                      size: 16.0,
-                    )
-                  ],
-                ),
-                subtitle: Text(
-                  'Yesterday at 11:21 Am',
-                  style:
-                  Theme.of(context).textTheme.caption!.copyWith(height: 0),
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 10),
-                child: Divider(
-                  color: Colors.grey,
-                  height: 1.0,
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.only(top: 10, bottom: 5),
-                child: Container(
-                  padding: EdgeInsets.symmetric(horizontal: 10),
-                  child: Text(
-                    'Looking forward to catching up on some reading this weekend. If you’re looking for a new book, here are a few you might want to try: https://gatesnot.es/3DNgW4N',
-                    style: Theme.of(context).textTheme.subtitle1!.copyWith(
-                        height: 1.3, fontSize: 14, fontWeight: FontWeight.w600),
-                  ),
-                ),
-              ),
-              Container(
-                padding: EdgeInsets.symmetric(horizontal: 8),
-                child: Wrap(children: [
-                  Container(
-                    padding: EdgeInsetsDirectional.only(end: 6),
-                    height: 25,
-                    child: MaterialButton(
-                      onPressed: () {},
-                      padding: EdgeInsets.zero,
-                      child: Text(
-                        '#KeepGoing',
-                        style: Theme.of(context)
-                            .textTheme
-                            .caption!
-                            .copyWith(color: Palette.facebookBlue),
-                      ),
-                      minWidth: 1.0,
-                    ),
-                  ),
-                ]),
-              ),
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 5),
-                child: Container(
-                    margin: EdgeInsets.all(8),
-                    height: 180,
-                    width: double.infinity,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(4),
-                      image: DecorationImage(
-                        image: NetworkImage(
-                          'https://i.ytimg.com/vi/Orh592OBoKY/maxresdefault.jpg'
-                      ),
-                        fit: BoxFit.cover,
-                      ),
-                    )),
-              ),
-              Padding(
-                padding:
-                const EdgeInsets.symmetric(vertical: 5.0, horizontal: 10),
-                child: Row(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(4.0),
-                      decoration: BoxDecoration(
-                        color: Palette.facebookBlue,
-                        shape: BoxShape.circle,
-                      ),
-                      child: const Icon(
-                        Icons.thumb_up,
-                        size: 10.0,
-                        color: Colors.white,
-                      ),
-                    ),
-                    SizedBox(width: 4.0),
-                    Expanded(
-                      child: Text(
-                        '18k',
-                        style: TextStyle(
-                          color: Colors.grey[600],
-                        ),
-                      ),
-                    ),
-                    Text(
-                      '129 Comments',
-                      style: TextStyle(
-                        color: Colors.grey[600],
-                      ),
-                    ),
-                    const SizedBox(width: 8.0),
-                    Text(
-                      '4k Shares',
-                      style: TextStyle(
-                        color: Colors.grey[600],
-                      ),
-                    )
-                  ],
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.all(20.0),
-                child: Row(
-                  children: [
-                    PostButton(
-                      icon: Icon(
-                        Icons.thumb_up_outlined,
-                        color: Colors.grey[600],
-                        size: 20.0,
-                      ),
-                      label: 'Like',
-                      onTap: () => print('Like'),
-                    ),
-                    PostButton(
-                      icon: Icon(
-                        Icons.mode_comment_outlined,
-                        color: Colors.grey[600],
-                        size: 20.0,
-                      ),
-                      label: 'Comment',
-                      onTap: () => print('Comment'),
-                    ),
-                    PostButton(
-                      icon: Icon(
-                        Icons.share_outlined,
-                        color: Colors.grey[600],
-                        size: 25.0,
-                      ),
-                      label: 'Share',
-                      onTap: () => print('Share'),
-                    )
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
-        Card(
-          elevation: 5,
-          color: Colors.white,
-          margin: EdgeInsets.all(8),
-          clipBehavior: Clip.antiAliasWithSaveLayer,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              ListTile(
-                contentPadding: EdgeInsets.symmetric(horizontal: 10),
-                trailing: IconButton(
-                  icon: Icon(
-                    Icons.more_horiz,
-                    color: Colors.black,
-                    size: 16,
-                  ),
-                  onPressed: () {},
-                ),
-                leading: CircleAvatar(
-                  radius: 20,
-                  backgroundImage: NetworkImage(
-                      'https://scontent.fcai21-2.fna.fbcdn.net/v/t1.6435-9/238934233_387368569420748_5386398352393347412_n.jpg?_nc_cat=1&ccb=1-5&_nc_sid=09cbfe&_nc_ohc=ig7ldRdTmYQAX_-CDEi&_nc_ht=scontent.fcai21-2.fna&oh=6d6372615b96d9130e80ece003949982&oe=6160408C'),
-                ),
-                title: Row(
-                  children: [
-                    Text(
-                      'Bill Gates',
-                      style: TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                    SizedBox(
-                      width: 5,
-                    ),
-                    Icon(
-                      Icons.check_circle,
-                      color: Palette.facebookBlue,
-                      size: 16.0,
-                    )
-                  ],
-                ),
-                subtitle: Text(
-                  'Yesterday at 11:21 Am',
-                  style:
-                      Theme.of(context).textTheme.caption!.copyWith(height: 0),
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 10),
-                child: Divider(
-                  color: Colors.grey,
-                  height: 1.0,
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.only(top: 10, bottom: 5),
-                child: Container(
-                  padding: EdgeInsets.symmetric(horizontal: 10),
-                  child: Text(
-                    'Looking forward to catching up on some reading this weekend. If you’re looking for a new book, here are a few you might want to try: https://gatesnot.es/3DNgW4N',
-                    style: Theme.of(context).textTheme.subtitle1!.copyWith(
-                        height: 1.3, fontSize: 14, fontWeight: FontWeight.w600),
-                  ),
-                ),
-              ),
-              Container(
-                padding: EdgeInsets.symmetric(horizontal: 8),
-                child: Wrap(children: [
-                  Container(
-                    padding: EdgeInsetsDirectional.only(end: 6),
-                    height: 25,
-                    child: MaterialButton(
-                      onPressed: () {},
-                      padding: EdgeInsets.zero,
-                      child: Text(
-                        '#KeepGoing',
-                        style: Theme.of(context)
-                            .textTheme
-                            .caption!
-                            .copyWith(color: Palette.facebookBlue),
-                      ),
-                      minWidth: 1.0,
-                    ),
-                  ),
-                ]),
-              ),
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 5),
-                child: Container(
-                    margin: EdgeInsets.all(8),
-                    height: 180,
-                    width: double.infinity,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(4),
-                      image: DecorationImage(
-                        image: NetworkImage(
-                            'https://scontent.fcai21-2.fna.fbcdn.net/v/t1.6435-9/s1080x2048/241553786_399569148200690_5609312441748104397_n.jpg?_nc_cat=105&ccb=1-5&_nc_sid=730e14&_nc_ohc=y6RulDnalroAX-1qIob&tn=YlGEcB1Mf_tOktnC&_nc_ht=scontent.fcai21-2.fna&oh=4447954be01a783b89b1c01ccaaf3838&oe=615FF063'),
-                        fit: BoxFit.cover,
-                      ),
-                    )),
-              ),
-              Padding(
-        padding:
-        const EdgeInsets.symmetric(vertical: 5.0, horizontal: 10),
-        child: Row(
+      ],
+    );
+  }
+}
+
+class _PostStats extends StatelessWidget {
+  final Post post;
+
+  const _PostStats({
+    required this.post,
+  }) ;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Row(
           children: [
             Container(
               padding: const EdgeInsets.all(4.0),
@@ -654,56 +179,54 @@ class Posts extends StatelessWidget {
                 color: Colors.white,
               ),
             ),
-            SizedBox(width: 4.0),
+            const SizedBox(width: 4.0),
             Expanded(
               child: Text(
-                '18k',
+                '${post.likes}',
                 style: TextStyle(
                   color: Colors.grey[600],
                 ),
               ),
             ),
             Text(
-              '129 Comments',
+              '${post.comments} Comments',
               style: TextStyle(
                 color: Colors.grey[600],
               ),
             ),
             const SizedBox(width: 8.0),
             Text(
-              '4k Shares',
+              '${post.shares} Shares',
               style: TextStyle(
                 color: Colors.grey[600],
               ),
             )
           ],
         ),
-      ),
-              Padding(
-        padding: const EdgeInsets.all(20.0),
-        child: Row(
+        const Divider(),
+        Row(
           children: [
-            PostButton(
+            _PostButton(
               icon: Icon(
-                Icons.thumb_up_outlined,
+                Mdi.thumbUpOutline,
                 color: Colors.grey[600],
                 size: 20.0,
               ),
               label: 'Like',
               onTap: () => print('Like'),
             ),
-            PostButton(
+            _PostButton(
               icon: Icon(
-                Icons.mode_comment_outlined,
+                Mdi.commentOutline,
                 color: Colors.grey[600],
                 size: 20.0,
               ),
               label: 'Comment',
               onTap: () => print('Comment'),
             ),
-            PostButton(
+            _PostButton(
               icon: Icon(
-                Icons.share_outlined,
+                Mdi.shareOutline,
                 color: Colors.grey[600],
                 size: 25.0,
               ),
@@ -712,174 +235,43 @@ class Posts extends StatelessWidget {
             )
           ],
         ),
+      ],
+    );
+  }
+}
+
+class _PostButton extends StatelessWidget {
+  final Icon icon;
+  final String label;
+  final Function onTap;
+
+  const _PostButton({
+    required this.icon,
+    required this.label,
+    required this.onTap,
+  }) ;
+
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      child: Material(
+        color: Colors.white,
+        child: InkWell(
+          onTap: (){onTap();},
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12.0),
+            height: 25.0,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                icon,
+                const SizedBox(width: 4.0),
+                Text(label),
+              ],
+            ),
+          ),
+        ),
       ),
-            ],
-          ),
-        ),
-        Card(
-          elevation: 5,
-          color: Colors.white,
-          margin: EdgeInsets.all(8),
-          clipBehavior: Clip.antiAliasWithSaveLayer,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              ListTile(
-                contentPadding: EdgeInsets.symmetric(horizontal: 10),
-                trailing: IconButton(
-                  icon: Icon(
-                    Icons.more_horiz,
-                    color: Colors.black,
-                    size: 16,
-                  ),
-                  onPressed: () {},
-                ),
-                leading: CircleAvatar(
-                  radius: 20,
-                  backgroundImage: NetworkImage(
-                      'https://scontent.fcai21-2.fna.fbcdn.net/v/t1.6435-1/p320x320/190108336_322648402555040_2100790391455013605_n.jpg?_nc_cat=1&ccb=1-5&_nc_sid=c6021c&_nc_ohc=7T_UiaLpVZ0AX9g3BI8&_nc_ht=scontent.fcai21-2.fna&oh=17c0c355d305d8caafffa95d0d03895f&oe=61621463'),
-                ),
-                title: Row(
-                  children: [
-                    Text(
-                      'Cristiano Ronaldo',
-                      style: TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                    SizedBox(
-                      width: 5,
-                    ),
-                    Icon(
-                      Icons.check_circle,
-                      color: Palette.facebookBlue,
-                      size: 16.0,
-                    )
-                  ],
-                ),
-                subtitle: Text(
-                  'Yesterday at 11:21 Am',
-                  style:
-                      Theme.of(context).textTheme.caption!.copyWith(height: 0),
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 10),
-                child: Divider(
-                  color: Colors.grey,
-                  height: 1.0,
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.only(top: 10, bottom: 5),
-                child: Container(
-                  padding: EdgeInsets.symmetric(horizontal: 10),
-                  child: Text(
-                    'This isn’t just another broken record, this is another record earned.Thank you Nike for honouring my achievement of 110 🇵🇹 goals by returning to Quinta do Falcão and restoring the court where I first set my goal to become the best.I think it is really important, whatever it is that you want to achieve in life, that you set goals, so you have something to work towards.Even if they are small goals, it gives you a great focus and sense of achievement when you get there.I hope this goal will help you reach your greatness.',
-                    style: Theme.of(context).textTheme.subtitle1!.copyWith(
-                        height: 1.3, fontSize: 14, fontWeight: FontWeight.w600),
-                  ),
-                ),
-              ),
-              Container(
-                padding: EdgeInsets.symmetric(horizontal: 8),
-                child: Wrap(children: [
-                  Container(
-                    padding: EdgeInsetsDirectional.only(end: 6),
-                    height: 25,
-                    child: MaterialButton(
-                      onPressed: () {},
-                      padding: EdgeInsets.zero,
-                      child: Text(
-                        '#nikefootball',
-                        style: Theme.of(context)
-                            .textTheme
-                            .caption!
-                            .copyWith(color: Palette.facebookBlue),
-                      ),
-                      minWidth: 1.0,
-                    ),
-                  ),
-                ]),
-              ),
-              Padding(
-                padding:
-                const EdgeInsets.symmetric(vertical: 5.0, horizontal: 10),
-                child: Row(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(4.0),
-                      decoration: BoxDecoration(
-                        color: Palette.facebookBlue,
-                        shape: BoxShape.circle,
-                      ),
-                      child: const Icon(
-                        Icons.thumb_up,
-                        size: 10.0,
-                        color: Colors.white,
-                      ),
-                    ),
-                    SizedBox(width: 4.0),
-                    Expanded(
-                      child: Text(
-                        '18k',
-                        style: TextStyle(
-                          color: Colors.grey[600],
-                        ),
-                      ),
-                    ),
-                    Text(
-                      '129 Comments',
-                      style: TextStyle(
-                        color: Colors.grey[600],
-                      ),
-                    ),
-                    const SizedBox(width: 8.0),
-                    Text(
-                      '4k Shares',
-                      style: TextStyle(
-                        color: Colors.grey[600],
-                      ),
-                    )
-                  ],
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.all(20.0),
-                child: Row(
-                  children: [
-                    PostButton(
-                      icon: Icon(
-                        Icons.thumb_up_outlined,
-                        color: Colors.grey[600],
-                        size: 20.0,
-                      ),
-                      label: 'Like',
-                      onTap: () => print('Like'),
-                    ),
-                    PostButton(
-                      icon: Icon(
-                        Icons.mode_comment_outlined,
-                        color: Colors.grey[600],
-                        size: 20.0,
-                      ),
-                      label: 'Comment',
-                      onTap: () => print('Comment'),
-                    ),
-                    PostButton(
-                      icon: Icon(
-                        Icons.share_outlined,
-                        color: Colors.grey[600],
-                        size: 25.0,
-                      ),
-                      label: 'Share',
-                      onTap: () => print('Share'),
-                    )
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
-      ]),
     );
   }
 }
